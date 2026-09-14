@@ -42,17 +42,29 @@ def split_text(documents: list[Document]):
 
 
 def get_embedding_function():
-    # Same model deploy-rag-to-aws uses (src/rag_app/get_embedding_function.py) —
-    # keeps this project's Chroma DB compatible with that one's embedding space.
     return BedrockEmbeddings(model_id="amazon.titan-embed-text-v2:0")
+
+
+def calculate_chunk_ids(chunks: list[Document]):
+    for chunk in chunks:
+        source = chunk.metadata.get("source")
+        start_index = chunk.metadata.get("start_index")
+        chunk.metadata["id"] = f"{source}:{start_index}"
+    return chunks
 
 
 def save_to_chroma(chunks: list[Document]):
     if os.path.exists(CHROMA_PATH):
         shutil.rmtree(CHROMA_PATH)
 
+    chunks = calculate_chunk_ids(chunks)
+    chunk_ids = [chunk.metadata["id"] for chunk in chunks]
+
     db = Chroma.from_documents(
-        chunks, get_embedding_function(), persist_directory=CHROMA_PATH
+        chunks,
+        get_embedding_function(),
+        persist_directory=CHROMA_PATH,
+        ids=chunk_ids,
     )
     print(f"Saved {len(chunks)} chunks to {CHROMA_PATH}.")
 
