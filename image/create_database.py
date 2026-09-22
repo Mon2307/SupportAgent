@@ -6,8 +6,11 @@ from langchain_chroma import Chroma
 import shutil
 import os
 
-CHROMA_PATH = "chroma"
-DATA_PATH = "data"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CHROMA_PATH = os.path.join(BASE_DIR, "chroma")
+DATA_PATH = os.path.join(BASE_DIR, "src/data")
+EMBED_BATCH_SIZE = 200
+EMBED_MAX_WORKERS = 8
 
 
 def main():
