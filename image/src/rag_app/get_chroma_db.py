@@ -4,7 +4,8 @@ import sys
 
 _RAG_APP_DIR = os.path.dirname(os.path.abspath(__file__))
 _IMAGE_DIR = os.path.dirname(os.path.dirname(_RAG_APP_DIR))
-CHROMA_PATH = os.path.join(_IMAGE_DIR, "chroma")
+_DEFAULT_CHROMA_PATH = os.path.join(_IMAGE_DIR, "chroma")
+CHROMA_PATH = os.environ.get("CHROMA_PATH", _DEFAULT_CHROMA_PATH)
 IS_USING_IMAGE_RUNTIME = bool(os.environ.get("IS_USING_IMAGE_RUNTIME", False))
 CHROMA_DB_INSTANCE = None
 
@@ -14,7 +15,7 @@ if IS_USING_IMAGE_RUNTIME:
     sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
 
 from langchain_chroma import Chroma
-from image.src.rag_app.get_embedding_function import get_embedding_function
+from rag_app.get_embedding_function import get_embedding_function
 
 
 def get_chroma_db():
