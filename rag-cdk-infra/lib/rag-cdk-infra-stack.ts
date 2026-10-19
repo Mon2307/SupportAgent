@@ -7,6 +7,7 @@ import {
   DockerImageCode,
   FunctionUrlAuthType,
   Architecture,
+  HttpMethod,
 } from "aws-cdk-lib/aws-lambda";
 import { ManagedPolicy } from "aws-cdk-lib/aws-iam";
 
@@ -29,7 +30,7 @@ export class RagCdkInfraStack extends cdk.Stack {
     });
     const workerFunction = new DockerImageFunction(this, "RagWorkerFunction", {
       code: workerImageCode,
-      memorySize: 512, // Increase this if you need more memory.
+      memorySize: 2048, // More memory = more CPU = faster cold starts.
       timeout: cdk.Duration.seconds(60), // Increase this if you need more time.
       architecture: Architecture.X86_64, // Needs to be the same as the image.
       environment: {
@@ -46,7 +47,7 @@ export class RagCdkInfraStack extends cdk.Stack {
     });
     const apiFunction = new DockerImageFunction(this, "ApiFunc", {
       code: apiImageCode,
-      memorySize: 256,
+      memorySize: 1024,
       timeout: cdk.Duration.seconds(30),
       architecture: Architecture.X86_64,
       environment: {
@@ -58,6 +59,11 @@ export class RagCdkInfraStack extends cdk.Stack {
     // Public URL for the API function.
     const functionUrl = apiFunction.addFunctionUrl({
       authType: FunctionUrlAuthType.NONE,
+      cors: {
+        allowedOrigins: ["*"],
+        allowedMethods: [HttpMethod.GET, HttpMethod.POST],
+        allowedHeaders: ["content-type"],
+      },
     });
 
     // Grant permissions for all resources to work together.
